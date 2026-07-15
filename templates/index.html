@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Nube dinámica de conceptos</title>
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='styles.css') }}"
+    >
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+    
+</head>
+
+<body>
+
+    <main id="app">
+
+        <header class="encabezado">
+            <div>
+                <p class="etiqueta">
+                    VISUALIZACIÓN DE CONCEPTOS
+                </p>
+
+                <h1>
+                    Nube dinámica de palabras
+                </h1>
+            </div>
+
+            <div class="controles">
+                <button
+                    id="microphoneButton"
+                    class="boton-microfono"
+                    type="button"
+                >
+                    Iniciar micrófono
+                </button>
+
+                <button
+                    id="clearButton"
+                    class="boton-limpiar"
+                    type="button"
+                >
+                    Limpiar texto
+                </button>
+
+                <div class="estado">
+                    <span
+                        id="statusIndicator"
+                        class="estado__indicador"
+                    ></span>
+
+                    <span id="statusText">
+                        Iniciando...
+                    </span>
+                </div>
+            </div>
+        </header>
+
+        <canvas id="cloudCanvas"></canvas>
+
+        <div id="transcriptionPanel" class="transcripcion">
+            <span class="transcripcion__etiqueta">
+                Transcripción:
+            </span>
+
+            <span id="transcriptionText">
+                Micrófono detenido
+            </span>
+        </div>
+
+        <div
+            id="emptyMessage"
+            class="mensaje-vacio oculto"
+        >
+            Agrega contenido en el archivo text.txt
+        </div>
+
+        <footer class="pie">
+            <span id="lastUpdate">
+                Esperando información...
+            </span>
+
+            <span id="wordCount">
+                0 conceptos
+            </span>
+        </footer>
+
+    </main>
+
+    <script
+        src="{{ url_for('static', filename='app.js') }}"
+    ></script>
+
+</body>
+</html>

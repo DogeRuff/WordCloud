@@ -1,0 +1,392 @@
+:root {
+    color-scheme: light;
+
+    font-family: "Poppins", sans-serif;
+
+    background: #ffffff;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+html,
+body {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    overflow: hidden;
+}
+
+body {
+    background:
+        radial-gradient(
+            ellipse at center,
+            #ffffff 0%,
+            #ffffff 22%,
+            #fafbfc 48%,
+            #edf0f4 75%,
+            #dfe4ea 100%
+        );
+
+    color: #1f2937;
+}
+
+#app {
+    position: relative;
+    width: 100vw;
+    height: 100vh;
+}
+
+#cloudCanvas {
+    position: absolute;
+    inset: 0;
+
+    z-index: 1;
+
+    display: block;
+
+    width: 100%;
+    height: 100%;
+}
+
+/* =========================================================
+   ENCABEZADO
+   ========================================================= */
+
+.encabezado {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+
+    z-index: 2;
+
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+
+    font-family: "Montserrat", sans-serif;
+    font-weight:600;
+
+    padding: 30px 40px;
+
+    pointer-events: none;
+}
+
+.etiqueta {
+    margin: 0 0 8px;
+
+    color: rgba(31, 41, 55, 0.52);
+
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.16em;
+}
+
+.encabezado h1 {
+    margin: 0;
+
+    color: #1f2937;
+
+    font-family: "Montserrat", sans-serif;
+    font-weight:700;
+    letter-spacing: -0.025em;
+}
+
+/* =========================================================
+   CONTROLES
+   ========================================================= */
+
+.controles {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+
+    gap: 14px;
+
+    pointer-events: auto;
+}
+
+.boton-microfono,
+.boton-limpiar {
+    min-width: 150px;
+
+    padding: 10px 18px;
+
+    border-radius: 999px;
+
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 600;
+
+    cursor: pointer;
+
+    pointer-events: auto;
+
+    transition:
+        background 180ms ease,
+        border-color 180ms ease,
+        box-shadow 180ms ease,
+        color 180ms ease,
+        transform 120ms ease,
+        opacity 180ms ease;
+}
+
+.boton-microfono {
+    border: 1px solid rgba(12, 58, 91, 0.35);
+
+    background: rgba(12, 58, 91, 0.90);
+    color: #ffffff;
+
+    box-shadow:
+        0 6px 18px rgba(12, 58, 91, 0.16);
+}
+
+.boton-microfono:hover {
+    background: rgba(12, 58, 91, 1);
+    border-color: rgba(12, 58, 91, 0.70);
+
+    box-shadow:
+        0 8px 24px rgba(12, 58, 91, 0.22);
+}
+
+.boton-microfono.activo {
+    border-color: rgba(160, 32, 60, 0.65);
+
+    background: rgba(160, 32, 60, 0.92);
+    color: #ffffff;
+
+    box-shadow:
+        0 7px 22px rgba(160, 32, 60, 0.22);
+}
+
+.boton-limpiar {
+    border: 1px solid rgba(80, 90, 105, 0.28);
+
+    background: rgba(255, 255, 255, 0.88);
+    color: #374151;
+
+    box-shadow:
+        0 6px 18px rgba(31, 41, 55, 0.09);
+}
+
+.boton-limpiar:hover {
+    background: #ffffff;
+    border-color: rgba(80, 90, 105, 0.50);
+
+    box-shadow:
+        0 8px 22px rgba(31, 41, 55, 0.13);
+}
+
+.boton-microfono:active,
+.boton-limpiar:active {
+    transform: scale(0.97);
+}
+
+.boton-microfono:disabled,
+.boton-limpiar:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+}
+
+/* =========================================================
+   ESTADO
+   ========================================================= */
+
+.estado {
+    display: flex;
+    align-items: center;
+
+    gap: 10px;
+
+    padding-top: 4px;
+
+    color: rgba(31, 41, 55, 0.68);
+
+    font-size: 14px;
+}
+
+.estado__indicador {
+    width: 10px;
+    height: 10px;
+
+    border-radius: 50%;
+
+    background: #f59e0b;
+
+    box-shadow:
+        0 0 8px rgba(245, 158, 11, 0.65),
+        0 0 18px rgba(245, 158, 11, 0.30);
+}
+
+.estado__indicador.activo {
+    background: #16a66a;
+
+    box-shadow:
+        0 0 8px rgba(22, 166, 106, 0.65),
+        0 0 18px rgba(22, 166, 106, 0.30);
+}
+
+.estado__indicador.error {
+    background: #dc2626;
+
+    box-shadow:
+        0 0 8px rgba(220, 38, 38, 0.65),
+        0 0 18px rgba(220, 38, 38, 0.30);
+}
+
+/* =========================================================
+   TRANSCRIPCIÓN
+   ========================================================= */
+
+.transcripcion {
+    position: absolute;
+    left: 50%;
+    bottom: 55px;
+
+    z-index: 2;
+
+    width: min(800px, 80vw);
+
+    padding: 12px 18px;
+
+    transform: translateX(-50%);
+
+    border: 1px solid rgba(12, 58, 91, 0.14);
+    border-radius: 14px;
+
+    background: rgba(255, 255, 255, 0.82);
+    color: rgba(31, 41, 55, 0.76);
+
+    font-size: 15px;
+    text-align: center;
+
+    box-shadow:
+        0 10px 30px rgba(31, 41, 55, 0.08);
+
+    backdrop-filter: blur(8px);
+
+    pointer-events: none;
+}
+
+.transcripcion__etiqueta {
+    color: rgba(12, 58, 91, 0.86);
+    font-weight: 700;
+}
+
+/* =========================================================
+   MENSAJE VACÍO
+   ========================================================= */
+
+.mensaje-vacio {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+
+    z-index: 3;
+
+    transform: translate(-50%, -50%);
+
+    color: rgba(31, 41, 55, 0.38);
+
+    font-size: clamp(18px, 2vw, 28px);
+    letter-spacing: 0.04em;
+    text-align: center;
+
+    pointer-events: none;
+}
+
+.oculto {
+    display: none;
+}
+
+/* =========================================================
+   PIE
+   ========================================================= */
+
+.pie {
+    position: absolute;
+    left: 40px;
+    right: 40px;
+    bottom: 22px;
+
+    z-index: 2;
+
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    color: rgba(31, 41, 55, 0.48);
+
+    font-size: 13px;
+    letter-spacing: 0.04em;
+
+    pointer-events: none;
+}
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+
+@media (max-width: 900px) {
+    .encabezado {
+        padding: 24px;
+    }
+
+    .encabezado h1 {
+        font-size: 32px;
+    }
+
+    .estado {
+        font-size: 12px;
+    }
+
+    .pie {
+        left: 24px;
+        right: 24px;
+        bottom: 18px;
+
+        font-size: 11px;
+    }
+}
+
+@media (max-width: 650px) {
+    .encabezado {
+        flex-direction: column;
+        gap: 16px;
+    }
+
+    .controles {
+        align-items: flex-start;
+    }
+
+    .boton-microfono,
+    .boton-limpiar {
+        min-width: 145px;
+    }
+
+    .estado {
+        padding-top: 0;
+    }
+
+    .transcripcion {
+        bottom: 78px;
+        width: calc(100vw - 32px);
+    }
+
+    .pie {
+        flex-direction: column;
+        align-items: flex-start;
+
+        gap: 6px;
+    }
+
+
+    .estado,
+    .pie,
+    .transcripcion,
+    button{
+        font-family: "Poppins", sans-serif;
+    }
+}
