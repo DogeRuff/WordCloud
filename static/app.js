@@ -19,12 +19,17 @@ const transcriptionText =
 const CONFIG = {
     intervaloActualizacion: 2000,
     maxPixelRatio: 1.5,
-    maxPalabras: 80,
-    margenSuperior: 130,
-    margenInferior: 70,
-    margenLateral: 60,
+    maxPalabras: 50,
+
+    margenSuperior: 115,
+    margenInferior: 75,
+    margenLateral: 35,
+
     velocidadFlotacion: 0.0005,
-    //brilloBase: 10
+
+    margenColision: 6,
+    margenAnimacion: 5,
+    tamanoMinimo: 12
 };
 
 let ancho = 0;
@@ -323,10 +328,10 @@ function hashTexto(texto) {
 
 
 function calcularTamano(peso) {
-    const minimo = Math.max(18, ancho * 0.012);
-    const maximo = Math.min(92, ancho * 0.052);
+    const minimo = Math.max(12, ancho * 0.008);
+    const maximo = Math.min(72, ancho * 0.038);
 
-    return minimo + Math.pow(peso, 0.72) * (maximo - minimo);
+    return minimo + Math.pow(peso, 0.85) * (maximo - minimo);
 }
 
 
@@ -343,13 +348,24 @@ function medirTexto(texto, tamano) {
 
 
 function seSuperpone(rectangulo, ocupados) {
-    const margen = 14;
+    const margen =
+        CONFIG.margenColision +
+        CONFIG.margenAnimacion;
 
     return ocupados.some((otro) => (
-        rectangulo.x < otro.x + otro.ancho + margen &&
-        rectangulo.x + rectangulo.ancho + margen > otro.x &&
-        rectangulo.y < otro.y + otro.alto + margen &&
-        rectangulo.y + rectangulo.alto + margen > otro.y
+        rectangulo.x <
+            otro.x + otro.ancho + margen &&
+
+        rectangulo.x +
+            rectangulo.ancho + margen >
+            otro.x &&
+
+        rectangulo.y <
+            otro.y + otro.alto + margen &&
+
+        rectangulo.y +
+            rectangulo.alto + margen >
+            otro.y
     ));
 }
 
@@ -371,15 +387,17 @@ function encontrarPosicion(palabra, ocupados, indice) {
     );
 
     const semilla = hashTexto(palabra.texto);
-    const anguloInicial = (semilla % 360) * Math.PI / 180;
 
-    for (let intento = 0; intento < 700; intento++) {
-        const angulo = anguloInicial + intento * 0.36;
+    const anguloInicial =
+        (semilla % 360) * Math.PI / 180;
 
+    for (let intento = 0; intento < 1400; intento++) {
+        const angulo =
+            anguloInicial + intento * 0.32;
+
+        // Espiral que sí recorre toda la pantalla.
         const radio =
-            4.1 *
-            Math.sqrt(intento) *
-            (1 + indice * 0.008);
+            4 + intento * 0.85;
 
         const x =
             centroX +
@@ -388,7 +406,7 @@ function encontrarPosicion(palabra, ocupados, indice) {
 
         const y =
             centroY +
-            Math.sin(angulo) * radio * 0.58 -
+            Math.sin(angulo) * radio * 0.55 -
             medida.alto / 2;
 
         const rectangulo = {
@@ -400,9 +418,11 @@ function encontrarPosicion(palabra, ocupados, indice) {
 
         const estaDentro =
             x >= CONFIG.margenLateral &&
-            x + medida.ancho <= ancho - CONFIG.margenLateral &&
+            x + medida.ancho <=
+                ancho - CONFIG.margenLateral &&
             y >= CONFIG.margenSuperior &&
-            y + medida.alto <= alto - CONFIG.margenInferior;
+            y + medida.alto <=
+                alto - CONFIG.margenInferior;
 
         if (
             estaDentro &&
@@ -417,23 +437,8 @@ function encontrarPosicion(palabra, ocupados, indice) {
         }
     }
 
-    return {
-        x:
-            CONFIG.margenLateral +
-            Math.random() *
-            (ancho - CONFIG.margenLateral * 2),
-
-        y:
-            CONFIG.margenSuperior +
-            Math.random() *
-            (
-                alto -
-                CONFIG.margenSuperior -
-                CONFIG.margenInferior
-            )
-    };
+    return null;
 }
-
 
 function prepararPalabras(datos) {
     const anteriores = new Map(
@@ -444,53 +449,102 @@ function prepararPalabras(datos) {
     );
 
     const ocupados = [];
+    const nuevasPalabras = [];
 
     const ordenadas = [...datos]
         .sort((a, b) => b.peso - a.peso)
         .slice(0, CONFIG.maxPalabras);
 
-    palabras = ordenadas.map((dato, indice) => {
-        const tamano = calcularTamano(dato.peso);
+    for (
+        let indice = 0;
+        indice < ordenadas.length;
+        indice++
+    ) {
+        const dato = ordenadas[indice];
 
-        const posicion = encontrarPosicion(
-            {
-                texto: dato.texto,
-                tamano
-            },
-            ocupados,
-            indice
-        );
+        const tamanoOriginal =
+            calcularTamano(dato.peso);
 
-        const anterior = anteriores.get(dato.texto);
-        const semilla = hashTexto(dato.texto);
+        let tamano = tamanoOriginal;
+        let posicion = null;
 
-        return {
+        /*
+         * Si no encuentra espacio, reduce el tamaño
+         * progresivamente hasta llegar al mínimo.
+         */
+        while (
+            tamano >= CONFIG.tamanoMinimo &&
+            posicion === null
+        ) {
+            posicion = encontrarPosicion(
+                {
+                    texto: dato.texto,
+                    tamano
+                },
+                ocupados,
+                indice
+            );
+
+            if (!posicion) {
+                tamano -= 2;
+            }
+        }
+
+        /*
+         * Si ni reduciendo el tamaño logra acomodarse,
+         * no la mostramos. Es mejor omitir una palabra
+         * secundaria que volver ilegible toda la nube.
+         */
+        if (!posicion) {
+            console.warn(
+                `No hubo espacio para: ${dato.texto}`
+            );
+
+            continue;
+        }
+
+        const anterior =
+            anteriores.get(dato.texto);
+
+        const semilla =
+            hashTexto(dato.texto);
+
+        nuevasPalabras.push({
             texto: dato.texto,
             frecuencia: dato.frecuencia,
             peso: dato.peso,
 
             tamano,
 
-            x: anterior ? anterior.x : ancho / 2,
-            y: anterior ? anterior.y : alto / 2,
+            x: anterior
+                ? anterior.x
+                : posicion.x,
+
+            y: anterior
+                ? anterior.y
+                : posicion.y,
 
             destinoX: posicion.x,
             destinoY: posicion.y,
 
-            opacidad: anterior ? anterior.opacidad : 0,
+            opacidad: anterior
+                ? anterior.opacidad
+                : 0,
 
-            fase:
-                anterior
-                    ? anterior.fase
-                    : (semilla % 628) / 100,
+            fase: anterior
+                ? anterior.fase
+                : (semilla % 628) / 100,
 
             velocidad:
                 0.75 +
                 (semilla % 40) / 100,
 
-            color: semilla % colores.length
-        };
-    });
+            color:
+                semilla % colores.length
+        });
+    }
+
+    palabras = nuevasPalabras;
 }
 
 
