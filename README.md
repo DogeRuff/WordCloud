@@ -1,6 +1,6 @@
 # Dynamic Word Cloud
 
-An animated word cloud built with **Python**, **Flask**, **spaCy**, and **HTML5 Canvas**. The application performs Natural Language Processing (NLP) on Spanish text, generates weighted concepts, and displays them in an animated visualization suitable for dashboards and institutional video walls.
+An animated word cloud built with **Python**, **Flask**, **spaCy**, and **HTML5 Canvas**. The application performs Natural Language Processing (NLP) on Spanish text, generates weighted concepts, and displays them in an animated visualization suitable for dashboards and institutional graphic devices.
 
 ---
 
